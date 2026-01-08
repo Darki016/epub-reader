@@ -250,9 +250,71 @@ export const LibraryView = () => {
 
     const recentBook = library.find(b => (b.progress || 0) > 0);
 
+    // Drag & Drop State
+    const [isDragging, setIsDragging] = useState(false);
+
+    const handleDragOver = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+    };
+
+    const handleDragEnter = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(true);
+    };
+
+    const handleDragLeave = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        // Only set to false if leaving the main container
+        if (e.currentTarget === e.target) {
+            setIsDragging(false);
+        }
+    };
+
+    const handleDrop = async (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(false);
+
+        const files = Array.from(e.dataTransfer.files);
+        const epubFiles = files.filter(f => f.type === 'application/epub+zip' || f.name.endsWith('.epub'));
+
+        if (epubFiles.length === 0) {
+            alert('Please drop valid .epub files');
+            return;
+        }
+
+        for (const file of epubFiles) {
+            try {
+                await addBook(file);
+            } catch (err) {
+                console.error('Failed to add book:', err);
+            }
+        }
+    };
+
     return (
-        <div className="relative h-full overflow-y-auto bg-background/50 custom-scrollbar">
+        <div
+            className="relative h-full overflow-y-auto bg-background/50 custom-scrollbar"
+            onDragOver={handleDragOver}
+            onDragEnter={handleDragEnter}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+        >
             <AmbientBackground />
+
+            {/* Drag & Drop Overlay */}
+            {isDragging && (
+                <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center pointer-events-none">
+                    <div className="p-8 rounded-2xl bg-primary/10 border-2 border-dashed border-primary text-center space-y-4">
+                        <Upload className="w-16 h-16 mx-auto text-primary animate-bounce" />
+                        <p className="text-2xl font-bold text-foreground">Drop EPUB files here</p>
+                        <p className="text-sm text-muted-foreground">Multiple files supported</p>
+                    </div>
+                </div>
+            )}
 
             <div className="relative z-10 max-w-7xl mx-auto p-6 md:p-10 lg:p-14 space-y-12 pb-32">
 
