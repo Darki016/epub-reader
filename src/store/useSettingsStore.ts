@@ -28,7 +28,7 @@ export const useSettingsStore = create<SettingsStore>()(
             fontFamily: 'Helvetica, Arial, sans-serif',
             fontWeight: 400,
             lineHeight: 1.5,
-            pageView: 'single',
+            pageView: 'double',
 
             setTheme: (theme) => set({ theme }),
             setFontSize: (fontSize) => set({ fontSize }),
