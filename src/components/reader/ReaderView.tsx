@@ -593,6 +593,9 @@ export const ReaderView = () => {
             ...ReactReaderStyle.arrow,
             color: activeTheme.fg,
             display: isMobile ? 'none' : 'block',
+            zIndex: 10, // Boost z-index for Firefox
+            cursor: 'pointer',
+            pointerEvents: 'auto',
         }
     };
 
