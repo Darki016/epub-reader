@@ -559,6 +559,26 @@ export const ReaderView = () => {
     );
 
     const activeTheme = getTheme(settings.theme);
+
+    // Custom Navigation Handlers
+    const prevPage = async () => {
+        if (!renditionRef.current) return;
+        try {
+            await renditionRef.current.prev();
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const nextPage = async () => {
+        if (!renditionRef.current) return;
+        try {
+            await renditionRef.current.next();
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
     const ownStyles: IReactReaderStyle = {
         ...ReactReaderStyle,
         container: {
@@ -590,19 +610,13 @@ export const ReaderView = () => {
             background: activeTheme.fg,
         },
         arrow: {
-            ...ReactReaderStyle.arrow,
-            color: activeTheme.fg,
-            display: isMobile ? 'none' : 'block',
-            zIndex: 10, // Boost z-index for Firefox
-            cursor: 'pointer',
-            pointerEvents: 'auto',
+            display: 'none', // Disable default arrows
         }
     };
 
     return (
         <div className="h-screen w-full bg-background relative">
             <AnimatePresence>
-                {/* Controls Container */}
                 {/* Controls Container */}
                 {(!isFocusMode || isMobile) && (
                     <>
@@ -642,6 +656,32 @@ export const ReaderView = () => {
                     </>
                 )}
             </AnimatePresence>
+
+            {/* Custom Desktop Navigation Arrows */}
+            {!isMobile && (
+                <>
+                    {/* Prev */}
+                    <button
+                        onClick={prevPage}
+                        className="fixed left-4 top-1/2 -translate-y-1/2 z-50 p-4 rounded-full bg-background/20 hover:bg-background/80 backdrop-blur-sm text-muted-foreground hover:text-foreground transition-all duration-300 shadow-md group border border-transparent hover:border-border/50"
+                        title="Previous Page"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="group-hover:scale-110 transition-transform">
+                            <path d="m15 18-6-6 6-6" />
+                        </svg>
+                    </button>
+                    {/* Next */}
+                    <button
+                        onClick={nextPage}
+                        className="fixed right-4 top-1/2 -translate-y-1/2 z-50 p-4 rounded-full bg-background/20 hover:bg-background/80 backdrop-blur-sm text-muted-foreground hover:text-foreground transition-all duration-300 shadow-md group border border-transparent hover:border-border/50"
+                        title="Next Page"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="group-hover:scale-110 transition-transform">
+                            <path d="m9 18 6-6-6-6" />
+                        </svg>
+                    </button>
+                </>
+            )}
 
             {/* Exit Focus Mode Button (Only when controls hidden) */}
             {isFocusMode && !isMobile && (
@@ -713,6 +753,12 @@ export const ReaderView = () => {
 
                                 // DISABLE NATIVE MENU
                                 w.document.addEventListener('contextmenu', (e: Event) => {
+                                    // Only prevent if selecting text? No, custom menu takes over.
+                                    // Check if text is selected
+                                    // const selection = w.getSelection();
+                                    // if (selection && selection.toString().length > 0) {
+                                    // Allow selection context menu? No we want ours
+                                    // }
                                     e.preventDefault();
                                     e.stopPropagation();
                                     return false;
